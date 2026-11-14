@@ -9,10 +9,12 @@ const PORT = process.env.PORT || 8080;
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
 
-// আপলোড ফোল্ডার চেক করা
-const UPLOADS_DIR = path.join(__dirname, 'public', 'uploads');
+// Serve static files directly from root directory
+app.use(express.static(__dirname));
+
+// Uploads ফোল্ডার চেক করা (রুট ফোল্ডারে)
+const UPLOADS_DIR = path.join(__dirname, 'uploads');
 if (!fs.existsSync(UPLOADS_DIR)) {
     fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 }
@@ -24,12 +26,10 @@ const db = new sqlite3.Database(dbFile, (err) => {
         console.error('Error opening database', err.message);
     } else {
         console.log('Connected to SQLite database.');
-        // টেবিল তৈরি
         db.run(`CREATE TABLE IF NOT EXISTS settings (
             key TEXT PRIMARY KEY,
             value TEXT
         )`, () => {
-            // ডিফল্ট ডাটা ইনিশিয়ালাইজ করা যদি না থাকে
             db.get(`SELECT value FROM settings WHERE key = 'images'`, (err, row) => {
                 if (!row) {
                     const defaultImages = JSON.stringify([
@@ -98,7 +98,7 @@ app.post('/api/delete-image', (req, res) => {
         if (index >= 0 && index < images.length) {
             const imgPath = images[index];
             if (imgPath.startsWith('/uploads/')) {
-                const fullPath = path.join(__dirname, 'public', imgPath);
+                const fullPath = path.join(__dirname, imgPath);
                 if (fs.existsSync(fullPath)) fs.unlinkSync(fullPath);
             }
             images.splice(index, 1);
@@ -122,6 +122,16 @@ app.post('/api/save-ads', (req, res) => {
         if (err) return res.status(500).json({ error: err.message });
         res.json({ success: true, ads: { smartlink, banner, popunder } });
     });
+});
+
+// রুট রাউট (হোম পেজ)
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// অ্যাডমিন পেজ রাউট
+app.get('/admin', (req, res) => {
+    res.sendFile(path.join(__dirname, 'admin.html'));
 });
 
 app.listen(PORT, () => {
