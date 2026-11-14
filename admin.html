@@ -3,179 +3,146 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - Images & Ads Manager</title>
+    <title>Admin Panel</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #0b0f19; color: #ffffff; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
-        .admin-box { background: #1e293b; padding: 25px; border-radius: 12px; width: 100%; max-width: 520px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
-        h2 { margin-bottom: 15px; color: #ff3366; text-align: center; font-size: 20px; }
-        h3 { margin: 20px 0 10px; color: #38bdf8; font-size: 16px; border-top: 1px solid #334155; padding-top: 15px; }
-        .input-group { margin-bottom: 12px; }
-        label { display: block; margin-bottom: 5px; font-size: 12px; color: #94a3b8; }
-        input[type="password"], input[type="file"], input[type="text"], textarea { width: 100%; padding: 10px; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 6px; font-size: 13px; }
-        textarea { resize: vertical; height: 65px; font-family: monospace; }
-        button { width: 100%; padding: 11px; background: #ff3366; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 8px; transition: 0.2s; }
-        button:hover { background: #e02e5b; }
-        .btn-save-ads { background: #10b981; }
-        .btn-save-ads:hover { background: #059669; }
-        .back-link { display: block; text-align: center; margin-top: 15px; color: #94a3b8; text-decoration: none; font-size: 13px; }
-        .back-link:hover { color: white; }
-        .msg { margin-top: 8px; text-align: center; font-size: 13px; color: #10b981; font-weight: bold; }
-        #adminDashboard { display: none; }
-        .image-list { margin-top: 10px; max-height: 140px; overflow-y: auto; background: #0f172a; padding: 10px; border-radius: 6px; }
-        .image-item { display: flex; justify-content: space-between; align-items: center; font-size: 12px; padding: 6px 0; border-bottom: 1px solid #1e293b; color: #cbd5e1; }
-        .image-thumb { width: 35px; height: 35px; object-fit: cover; border-radius: 4px; }
-        .delete-btn { background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; width: auto; margin: 0; }
-        .delete-btn:hover { background: #dc2626; }
+        body { font-family: Arial, sans-serif; background: #eef2f3; margin: 0; padding: 20px; }
+        .admin-container { max-width: 700px; margin: auto; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .section { margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #ddd; }
+        input, textarea, button { width: 100%; padding: 10px; margin-top: 8px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button { background: #28a745; color: white; border: none; font-weight: bold; cursor: pointer; }
+        button:hover { background: #218838; }
+        .image-item { display: flex; align-items: center; justify-content: space-between; background: #f9f9f9; padding: 10px; margin-bottom: 8px; border-radius: 4px; }
+        .image-item img { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; }
+        .delete-btn { background: #dc3545; width: auto; padding: 5px 10px; margin: 0; }
+        .delete-btn:hover { background: #c82333; }
     </style>
 </head>
 <body>
 
-    <div class="admin-box">
-        <!-- লগইন সেকশন -->
-        <div id="loginSection">
-            <h2>🔐 Admin Login</h2>
-            <div class="input-group">
-                <label>Password (Default: admin123)</label>
-                <input type="password" id="adminPass" placeholder="Enter password">
-            </div>
-            <button onclick="loginAdmin()">Login</button>
-            <a href="index.html" class="back-link">← Back to Landing Page</a>
+    <div class="admin-container">
+        <h2>Admin Control Panel</h2>
+
+        <!-- Image Upload Section -->
+        <div class="section">
+            <h3>Upload New Image</h3>
+            <input type="file" id="imageFile" accept="image/*">
+            <button onclick="uploadImage()">Upload Image</button>
         </div>
 
-        <!-- ড্যাশবোর্ড সেকশন -->
-        <div id="adminDashboard">
-            <h2>📁 Upload Image from Device</h2>
-            <div class="input-group">
-                <label>Select Image File</label>
-                <input type="file" id="imageFile" accept="image/*">
-            </div>
-            <button onclick="uploadImage()">Upload & Save Image</button>
-            <div class="msg" id="imgMsg"></div>
+        <!-- Manage Existing Images -->
+        <div class="section">
+            <h3>Manage Images</h3>
+            <div id="admin-image-list">Loading...</div>
+        </div>
 
-            <label style="margin-top: 12px;">Uploaded Images:</label>
-            <div class="image-list" id="imageListContainer"></div>
+        <!-- Ad Configurations Section -->
+        <div class="section">
+            <h3>Adsterra Configurations</h3>
+            <label>Smartlink URL:</label>
+            <input type="text" id="smartlink" placeholder="Enter Smartlink URL">
 
-            <!-- নতুন অ্যাড ম্যানেজমেন্ট বক্স -->
-            <h3>💰 Manage Adsterra Ads</h3>
-            
-            <div class="input-group">
-                <label>1. Smartlink URL (Direct Link):</label>
-                <input type="text" id="smartlinkInput" placeholder="https://www.highperformanceformat.com/...">
-            </div>
+            <label>Banner Ad Code:</label>
+            <textarea id="banner" rows="3" placeholder="Paste Banner Script/HTML"></textarea>
 
-            <div class="input-group">
-                <label>2. Banner / Native Ad Code (HTML/Script):</label>
-                <textarea id="bannerCodeInput" placeholder="<script type='text/javascript' src='...'></script>"></textarea>
-            </div>
+            <label>Popunder / Social Bar Script:</label>
+            <textarea id="popunder" rows="3" placeholder="Paste Popunder Script"></textarea>
 
-            <div class="input-group">
-                <label>3. Social Bar / Popunder Code (HTML/Script):</label>
-                <textarea id="popunderCodeInput" placeholder="<script type='text/javascript' src='...'></script>"></textarea>
-            </div>
-
-            <button class="btn-save-ads" onclick="saveAds()">💾 Save All Ads</button>
-            <div class="msg" id="adsMsg"></div>
-
-            <button onclick="logoutAdmin()" style="background: #334155; margin-top: 18px;">Logout</button>
-            <a href="index.html" class="back-link" target="_blank">Preview Landing Page →</a>
+            <button onclick="saveAds()">Save Ad Settings</button>
         </div>
     </div>
 
     <script>
-        function loginAdmin() {
-            const pass = document.getElementById('adminPass').value;
-            if (pass === 'admin123') {
-                document.getElementById('loginSection').style.display = 'none';
-                document.getElementById('adminDashboard').style.display = 'block';
-                loadImages();
-                loadAds();
+        async function fetchData() {
+            const res = await fetch('/api/data');
+            const data = await res.json();
+            
+            // Populate Ads
+            if (data.ads) {
+                document.getElementById('smartlink').value = data.ads.smartlink || '';
+                document.getElementById('banner').value = data.ads.banner || '';
+                document.getElementById('popunder').value = data.ads.popunder || '';
+            }
+
+            // Populate Images
+            const listDiv = document.getElementById('admin-image-list');
+            listDiv.innerHTML = '';
+            if (data.images && data.images.length > 0) {
+                data.images.forEach((imgUrl, index) => {
+                    listDiv.innerHTML += `
+                        <div class="image-item">
+                            <img src="${imgUrl}" alt="Img">
+                            <span>Image ${index + 1}</span>
+                            <button class="delete-btn" onclick="deleteImage(${index})">Delete</button>
+                        </div>
+                    `;
+                });
             } else {
-                alert('Wrong Password!');
+                listDiv.innerHTML = '<p>No images uploaded yet.</p>';
             }
         }
 
-        function logoutAdmin() {
-            document.getElementById('adminDashboard').style.display = 'none';
-            document.getElementById('loginSection').style.display = 'block';
-            document.getElementById('adminPass').value = '';
-        }
-
-        // ইমেজ ফাংশনসমূহ
-        function getStoredImages() {
-            let defaultImages = [
-                "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=600&q=80",
-                "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=600&q=80"
-            ];
-            return JSON.parse(localStorage.getItem('uploaded_landing_images')) || defaultImages;
-        }
-
-        function loadImages() {
-            const container = document.getElementById('imageListContainer');
-            container.innerHTML = '';
-            let images = getStoredImages();
-
-            images.forEach((img, index) => {
-                container.innerHTML += `
-                    <div class="image-item">
-                        <img src="${img}" class="image-thumb">
-                        <span>Image ${index + 1}</span>
-                        <button class="delete-btn" onclick="deleteImage(${index})">Delete</button>
-                    </div>
-                `;
-            });
-        }
-
-        function uploadImage() {
+        async function uploadImage() {
             const fileInput = document.getElementById('imageFile');
             if (fileInput.files.length === 0) {
-                alert('Please select an image file first!');
+                alert('Please select an image first!');
                 return;
             }
 
-            const file = fileInput.files[0];
-            const reader = new FileReader();
+            const formData = new FormData();
+            formData.append('image', fileInput.files[0]);
 
-            reader.onload = function(e) {
-                const base64String = e.target.result;
-                let images = getStoredImages();
-                images.push(base64String);
-                localStorage.setItem('uploaded_landing_images', JSON.stringify(images));
+            const res = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            });
 
+            const result = await res.json();
+            if (result.success) {
+                alert('Image uploaded successfully!');
                 fileInput.value = '';
-                document.getElementById('imgMsg').innerText = '✅ Image uploaded & saved!';
-                setTimeout(() => { document.getElementById('imgMsg').innerText = ''; }, 2500);
-                loadImages();
+                fetchData();
+            } else {
+                alert('Upload failed!');
             }
-            reader.readAsDataURL(file);
         }
 
-        function deleteImage(index) {
-            let images = getStoredImages();
-            images.splice(index, 1);
-            localStorage.setItem('uploaded_landing_images', JSON.stringify(images));
-            loadImages();
+        async function deleteImage(index) {
+            if (!confirm('Are you sure you want to delete this image?')) return;
+
+            const res = await fetch('/api/delete-image', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ index })
+            });
+
+            const result = await res.json();
+            if (result.success) {
+                fetchData();
+            } else {
+                alert('Delete failed!');
+            }
         }
 
-        // অ্যাড সেভ ও লোড করার ফাংশন
-        function loadAds() {
-            const savedAds = JSON.parse(localStorage.getItem('adsterra_ads_data')) || {};
-            document.getElementById('smartlinkInput').value = savedAds.smartlink || '';
-            document.getElementById('bannerCodeInput').value = savedAds.banner || '';
-            document.getElementById('popunderCodeInput').value = savedAds.popunder || '';
+        async function saveAds() {
+            const smartlink = document.getElementById('smartlink').value;
+            const banner = document.getElementById('banner').value;
+            const popunder = document.getElementById('popunder').value;
+
+            const res = await fetch('/api/save-ads', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ smartlink, banner, popunder })
+            });
+
+            const result = await res.json();
+            if (result.success) {
+                alert('Ad settings saved permanently!');
+            } else {
+                alert('Failed to save ads!');
+            }
         }
 
-        function saveAds() {
-            const adsData = {
-                smartlink: document.getElementById('smartlinkInput').value.trim(),
-                banner: document.getElementById('bannerCodeInput').value.trim(),
-                popunder: document.getElementById('popunderCodeInput').value.trim()
-            };
-            localStorage.setItem('adsterra_ads_data', JSON.stringify(adsData));
-            
-            document.getElementById('adsMsg').innerText = '✅ All Ads Saved Successfully!';
-            setTimeout(() => { document.getElementById('adsMsg').innerText = ''; }, 3000);
-        }
+        fetchData();
     </script>
 </body>
 </html>
