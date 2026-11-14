@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Images & Ads Manager</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #0b0f19; color: #ffffff; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        .admin-box { background: #1e293b; padding: 25px; border-radius: 12px; width: 100%; max-width: 520px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        h2 { margin-bottom: 15px; color: #ff3366; text-align: center; font-size: 20px; }
+        h3 { margin: 20px 0 10px; color: #38bdf8; font-size: 16px; border-top: 1px solid #334155; padding-top: 15px; }
+        .input-group { margin-bottom: 12px; }
+        label { display: block; margin-bottom: 5px; font-size: 12px; color: #94a3b8; }
+        input[type="password"], input[type="file"], input[type="text"], textarea { width: 100%; padding: 10px; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 6px; font-size: 13px; }
+        textarea { resize: vertical; height: 65px; font-family: monospace; }
+        button { width: 100%; padding: 11px; background: #ff3366; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 8px; transition: 0.2s; }
+        button:hover { background: #e02e5b; }
+        .btn-save-ads { background: #10b981; }
+        .btn-save-ads:hover { background: #059669; }
+        .back-link { display: block; text-align: center; margin-top: 15px; color: #94a3b8; text-decoration: none; font-size: 13px; }
+        .back-link:hover { color: white; }
+        .msg { margin-top: 8px; text-align: center; font-size: 13px; color: #10b981; font-weight: bold; }
+        #adminDashboard { display: none; }
+        .image-list { margin-top: 10px; max-height: 140px; overflow-y: auto; background: #0f172a; padding: 10px; border-radius: 6px; }
+        .image-item { display: flex; justify-content: space-between; align-items: center; font-size: 12px; padding: 6px 0; border-bottom: 1px solid #1e293b; color: #cbd5e1; }
+        .image-thumb { width: 35px; height: 35px; object-fit: cover; border-radius: 4px; }
+        .delete-btn { background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; width: auto; margin: 0; }
+        .delete-btn:hover { background: #dc2626; }
+    </style>
+</head>
+<body>
+
+    <div class="admin-box">
+        <!-- লগইন সেকশন -->
+        <div id="loginSection">
+            <h2>🔐 Admin Login</h2>
+            <div class="input-group">
+                <label>Password (Default: admin123)</label>
+                <input type="password" id="adminPass" placeholder="Enter password">
+            </div>
+            <button onclick="loginAdmin()">Login</button>
+            <a href="index.html" class="back-link">← Back to Landing Page</a>
+        </div>
+
+        <!-- ড্যাশবোর্ড সেকশন -->
+        <div id="adminDashboard">
+            <h2>📁 Upload Image from Device</h2>
+            <div class="input-group">
+                <label>Select Image File</label>
+                <input type="file" id="imageFile" accept="image/*">
+            </div>
+            <button onclick="uploadImage()">Upload & Save Image</button>
+            <div class="msg" id="imgMsg"></div>
+
+            <label style="margin-top: 12px;">Uploaded Images:</label>
+            <div class="image-list" id="imageListContainer"></div>
+
+            <!-- নতুন অ্যাড ম্যানেজমেন্ট বক্স -->
+            <h3>💰 Manage Adsterra Ads</h3>
+            
+            <div class="input-group">
+                <label>1. Smartlink URL (Direct Link):</label>
+                <input type="text" id="smartlinkInput" placeholder="https://www.highperformanceformat.com/...">
+            </div>
+
+            <div class="input-group">
+                <label>2. Banner / Native Ad Code (HTML/Script):</label>
+                <textarea id="bannerCodeInput" placeholder="<script type='text/javascript' src='...'></script>"></textarea>
+            </div>
+
+            <div class="input-group">
+                <label>3. Social Bar / Popunder Code (HTML/Script):</label>
+                <textarea id="popunderCodeInput" placeholder="<script type='text/javascript' src='...'></script>"></textarea>
+            </div>
+
+            <button class="btn-save-ads" onclick="saveAds()">💾 Save All Ads</button>
+            <div class="msg" id="adsMsg"></div>
+
+            <button onclick="logoutAdmin()" style="background: #334155; margin-top: 18px;">Logout</button>
+            <a href="index.html" class="back-link" target="_blank">Preview Landing Page →</a>
+        </div>
+    </div>
+
+    <script>
+        function loginAdmin() {
+            const pass = document.getElementById('adminPass').value;
+            if (pass === 'admin123') {
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('adminDashboard').style.display = 'block';
+                loadImages();
+                loadAds();
+            } else {
+                alert('Wrong Password!');
+            }
+        }
+
+        function logoutAdmin() {
+            document.getElementById('adminDashboard').style.display = 'none';
+            document.getElementById('loginSection').style.display = 'block';
+            document.getElementById('adminPass').value = '';
+        }
+
+        // ইমেজ ফাংশনসমূহ
+        function getStoredImages() {
+            let defaultImages = [
+                "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=600&q=80",
+                "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=600&q=80"
+            ];
+            return JSON.parse(localStorage.getItem('uploaded_landing_images')) || defaultImages;
+        }
+
+        function loadImages() {
+            const container = document.getElementById('imageListContainer');
+            container.innerHTML = '';
+            let images = getStoredImages();
+
+            images.forEach((img, index) => {
+                container.innerHTML += `
+                    <div class="image-item">
+                        <img src="${img}" class="image-thumb">
+                        <span>Image ${index + 1}</span>
+                        <button class="delete-btn" onclick="deleteImage(${index})">Delete</button>
+                    </div>
+                `;
+            });
+        }
+
+        function uploadImage() {
+            const fileInput = document.getElementById('imageFile');
+            if (fileInput.files.length === 0) {
+                alert('Please select an image file first!');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                const base64String = e.target.result;
+                let images = getStoredImages();
+                images.push(base64String);
+                localStorage.setItem('uploaded_landing_images', JSON.stringify(images));
+
+                fileInput.value = '';
+                document.getElementById('imgMsg').innerText = '✅ Image uploaded & saved!';
+                setTimeout(() => { document.getElementById('imgMsg').innerText = ''; }, 2500);
+                loadImages();
+            }
+            reader.readAsDataURL(file);
+        }
+
+        function deleteImage(index) {
+            let images = getStoredImages();
+            images.splice(index, 1);
+            localStorage.setItem('uploaded_landing_images', JSON.stringify(images));
+            loadImages();
+        }
+
+        // অ্যাড সেভ ও লোড করার ফাংশন
+        function loadAds() {
+            const savedAds = JSON.parse(localStorage.getItem('adsterra_ads_data')) || {};
+            document.getElementById('smartlinkInput').value = savedAds.smartlink || '';
+            document.getElementById('bannerCodeInput').value = savedAds.banner || '';
+            document.getElementById('popunderCodeInput').value = savedAds.popunder || '';
+        }
+
+        function saveAds() {
+            const adsData = {
+                smartlink: document.getElementById('smartlinkInput').value.trim(),
+                banner: document.getElementById('bannerCodeInput').value.trim(),
+                popunder: document.getElementById('popunderCodeInput').value.trim()
+            };
+            localStorage.setItem('adsterra_ads_data', JSON.stringify(adsData));
+            
+            document.getElementById('adsMsg').innerText = '✅ All Ads Saved Successfully!';
+            setTimeout(() => { document.getElementById('adsMsg').innerText = ''; }, 3000);
+        }
+    </script>
+</body>
+</html>
