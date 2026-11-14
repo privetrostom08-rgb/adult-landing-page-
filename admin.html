@@ -29,7 +29,7 @@
             <button onclick="uploadImage()">Upload Image</button>
         </div>
 
-        <!-- Manage Existing Images -->
+        <!-- Manage Images -->
         <div class="section">
             <h3>Manage Images</h3>
             <div id="admin-image-list">Loading...</div>
@@ -56,14 +56,12 @@
             const res = await fetch('/api/data');
             const data = await res.json();
             
-            // Populate Ads
             if (data.ads) {
                 document.getElementById('smartlink').value = data.ads.smartlink || '';
                 document.getElementById('banner').value = data.ads.banner || '';
                 document.getElementById('popunder').value = data.ads.popunder || '';
             }
 
-            // Populate Images
             const listDiv = document.getElementById('admin-image-list');
             listDiv.innerHTML = '';
             if (data.images && data.images.length > 0) {
