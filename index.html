@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome</title>
+    <title>Landing Page</title>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; background: #f4f4f9; margin: 0; padding: 20px; }
         .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
@@ -25,7 +25,7 @@
         </div>
     </div>
 
-    <!-- Popunder Ad Injection Script -->
+    <!-- Popunder Ad Container -->
     <div id="popunder-container"></div>
 
     <script>
@@ -52,10 +52,9 @@
                     document.getElementById('banner-ad').innerHTML = data.ads.banner;
                 }
 
-                // Load Popunder Ad / Smartlink Action
+                // Load Popunder Ad
                 if (data.ads && data.ads.popunder) {
-                    const popDiv = document.getElementById('popunder-container');
-                    popDiv.innerHTML = data.ads.popunder;
+                    document.getElementById('popunder-container').innerHTML = data.ads.popunder;
                 }
 
             } catch (err) {
