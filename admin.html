@@ -53,29 +53,33 @@
 
     <script>
         async function fetchData() {
-            const res = await fetch('/api/data');
-            const data = await res.json();
-            
-            if (data.ads) {
-                document.getElementById('smartlink').value = data.ads.smartlink || '';
-                document.getElementById('banner').value = data.ads.banner || '';
-                document.getElementById('popunder').value = data.ads.popunder || '';
-            }
+            try {
+                const res = await fetch('/api/data?' + new Date().getTime()); // Prevent cache
+                const data = await res.json();
+                
+                if (data.ads) {
+                    document.getElementById('smartlink').value = data.ads.smartlink || '';
+                    document.getElementById('banner').value = data.ads.banner || '';
+                    document.getElementById('popunder').value = data.ads.popunder || '';
+                }
 
-            const listDiv = document.getElementById('admin-image-list');
-            listDiv.innerHTML = '';
-            if (data.images && data.images.length > 0) {
-                data.images.forEach((imgUrl, index) => {
-                    listDiv.innerHTML += `
-                        <div class="image-item">
-                            <img src="${imgUrl}" alt="Img">
-                            <span>Image ${index + 1}</span>
-                            <button class="delete-btn" onclick="deleteImage(${index})">Delete</button>
-                        </div>
-                    `;
-                });
-            } else {
-                listDiv.innerHTML = '<p>No images uploaded yet.</p>';
+                const listDiv = document.getElementById('admin-image-list');
+                listDiv.innerHTML = '';
+                if (data.images && data.images.length > 0) {
+                    data.images.forEach((imgUrl, index) => {
+                        listDiv.innerHTML += `
+                            <div class="image-item">
+                                <img src="${imgUrl}" alt="Img">
+                                <span>Image ${index + 1}</span>
+                                <button class="delete-btn" onclick="deleteImage(${index})">Delete</button>
+                            </div>
+                        `;
+                    });
+                } else {
+                    listDiv.innerHTML = '<p>No images uploaded yet.</p>';
+                }
+            } catch (err) {
+                console.error('Error fetching data:', err);
             }
         }
 
@@ -122,9 +126,9 @@
         }
 
         async function saveAds() {
-            const smartlink = document.getElementById('smartlink').value;
-            const banner = document.getElementById('banner').value;
-            const popunder = document.getElementById('popunder').value;
+            const smartlink = document.getElementById('smartlink').value.trim();
+            const banner = document.getElementById('banner').value.trim();
+            const popunder = document.getElementById('popunder').value.trim();
 
             const res = await fetch('/api/save-ads', {
                 method: 'POST',
@@ -134,7 +138,8 @@
 
             const result = await res.json();
             if (result.success) {
-                alert('Ad settings saved permanently!');
+                alert('Ad settings and Smartlink saved permanently!');
+                fetchData();
             } else {
                 alert('Failed to save ads!');
             }
