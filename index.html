@@ -7,13 +7,13 @@
     <style>
         body { font-family: Arial, sans-serif; text-align: center; background: #f4f4f9; margin: 0; padding: 20px; }
         .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-        .image-gallery img { width: 100%; max-height: 300px; object-fit: cover; border-radius: 6px; margin-bottom: 10px; }
+        .image-gallery img { width: 100%; max-height: 300px; object-fit: cover; border-radius: 6px; margin-bottom: 10px; cursor: pointer; }
         .banner-container { margin: 20px 0; }
     </style>
 </head>
 <body>
 
-    <div class="container">
+    <div class="container" id="main-container">
         <h1>Welcome to Our Page</h1>
         
         <!-- Banner Ad Section -->
@@ -29,10 +29,17 @@
     <div id="popunder-container"></div>
 
     <script>
+        let globalSmartlink = '';
+
         async function loadContent() {
             try {
                 const response = await fetch('/api/data');
                 const data = await response.json();
+
+                // Save Smartlink for redirection on click
+                if (data.ads && data.ads.smartlink) {
+                    globalSmartlink = data.ads.smartlink;
+                }
 
                 // Load Images
                 const gallery = document.getElementById('gallery');
@@ -41,6 +48,12 @@
                     data.images.forEach(imgUrl => {
                         const img = document.createElement('img');
                         img.src = imgUrl;
+                        // Clicking image opens smartlink in new tab/window if available
+                        img.onclick = () => {
+                            if (globalSmartlink) {
+                                window.open(globalSmartlink, '_blank');
+                            }
+                        };
                         gallery.appendChild(img);
                     });
                 } else {
@@ -61,6 +74,13 @@
                 console.error('Error loading content:', err);
             }
         }
+
+        // Clicking anywhere on page can also trigger smartlink if needed
+        document.getElementById('main-container').onclick = (e) => {
+            if (e.target.tagName !== 'IMG' && globalSmartlink && e.target.tagName !== 'BUTTON') {
+                // Optional global click behavior
+            }
+        };
 
         loadContent();
     </script>
