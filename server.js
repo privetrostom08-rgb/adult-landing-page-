@@ -9,11 +9,9 @@ const PORT = process.env.PORT || 8080;
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
-
-// Serve static files directly from root directory
 app.use(express.static(__dirname));
 
-// Uploads ফোল্ডার চেক করা (রুট ফোল্ডারে)
+// আপলোড ফোল্ডার চেক করা
 const UPLOADS_DIR = path.join(__dirname, 'uploads');
 if (!fs.existsSync(UPLOADS_DIR)) {
     fs.mkdirSync(UPLOADS_DIR, { recursive: true });
@@ -58,7 +56,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
-// API: সব ডাটা ফেচ করা
+// API: ডাটা ফেচ করা
 app.get('/api/data', (req, res) => {
     db.all(`SELECT * FROM settings`, (err, rows) => {
         if (err) return res.status(500).json({ error: err.message });
@@ -72,7 +70,7 @@ app.get('/api/data', (req, res) => {
     });
 });
 
-// API: ছবি আপলোড করা
+// API: ছবি আপলোড
 app.post('/api/upload', upload.single('image'), (req, res) => {
     if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
 
@@ -88,7 +86,7 @@ app.post('/api/upload', upload.single('image'), (req, res) => {
     });
 });
 
-// API: ছবি ডিলিট করা
+// API: ছবি ডিলিট
 app.post('/api/delete-image', (req, res) => {
     const { index } = req.body;
     db.get(`SELECT value FROM settings WHERE key = 'images'`, (err, row) => {
@@ -113,7 +111,7 @@ app.post('/api/delete-image', (req, res) => {
     });
 });
 
-// API: অ্যাড সেভ করা
+// API: অ্যাড সেভ
 app.post('/api/save-ads', (req, res) => {
     const { smartlink, banner, popunder } = req.body;
     const adsData = JSON.stringify({ smartlink, banner, popunder });
@@ -124,12 +122,11 @@ app.post('/api/save-ads', (req, res) => {
     });
 });
 
-// রুট রাউট (হোম পেজ)
+// রাউটস
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// অ্যাডমিন পেজ রাউট
 app.get('/admin', (req, res) => {
     res.sendFile(path.join(__dirname, 'admin.html'));
 });
